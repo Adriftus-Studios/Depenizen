@@ -1,5 +1,7 @@
 package com.denizenscript.depenizen.bukkit;
 
+import com.denizenscript.denizen.nms.NMSHandler;
+import com.denizenscript.denizen.nms.NMSVersion;
 import com.denizenscript.denizen.utilities.DenizenAPI;
 import com.denizenscript.depenizen.bukkit.bridges.*;
 import com.denizenscript.depenizen.bukkit.bungee.BungeeBridge;

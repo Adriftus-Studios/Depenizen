@@ -4,12 +4,18 @@ import com.denizenscript.denizen.objects.LocationTag;
 import com.denizenscript.denizen.objects.PlayerTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.depenizen.bukkit.Bridge;
-import net.minecraft.server.v1_16_R2.Vec3D;
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 import org.vivecraft.VSE;
 import org.vivecraft.VivePlayer;
 
 public class VivecraftBridge extends Bridge {
+
+    public LocationTag convertVector(String vectorString) {
+        String[] list = vectorString.substring(1, vectorString.length()-1).split(", ");
+        Vector vector = new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]));
+        return new LocationTag(vector);
+    }
 
     @Override
     public void init() {
@@ -50,7 +56,7 @@ public class VivecraftBridge extends Bridge {
                     // TODO
                     // -->
 
-                    if (attribute.startsWith("headset_location") && attribute.hasContext(1)) {
+                    if (attribute.startsWith("headset_location")) {
                         return new LocationTag((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value());
                     }
 
@@ -62,7 +68,7 @@ public class VivecraftBridge extends Bridge {
                     // TODO
                     // -->
 
-                    if (attribute.startsWith("righthand_location") && attribute.hasContext(1)) {
+                    if (attribute.startsWith("righthand_location")) {
                         return new LocationTag((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value());
                     }
 
@@ -74,7 +80,7 @@ public class VivecraftBridge extends Bridge {
                     // TODO
                     // -->
 
-                    if (attribute.startsWith("lefthand_location") && attribute.hasContext(1)) {
+                    if (attribute.startsWith("lefthand_location")) {
                         return new LocationTag((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value());
                     }
 
@@ -87,7 +93,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("headset_rotation_x")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("head.aim").get(0).value()).getX());
+                        return convertVector(player.getPlayerEntity().getMetadata("head.aim").get(0).asString());
                     }
 
                     // <--[tag]
@@ -99,7 +105,29 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("righthand_rotation_x")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("righthand.aim").get(0).value()).getX());
+                        return convertVector(player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString());
+                    }
+
+                    // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.righthand_aim>
+                    // @returns LocationTag(Vector)
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // TODO
+                    // -->
+                    if (attribute.startsWith("righthand_aim")) {
+                        return convertVector(player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString());
+                    }
+
+                    // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.lefthand_aim>
+                    // @returns LocationTag(Vector)
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // TODO
+                    // -->
+                    if (attribute.startsWith("lefthand_aim")) {
+                        return convertVector(player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString());
                     }
 
                     // <--[tag]
@@ -111,7 +139,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("lefthand_rotation_x")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getX());
+                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getX());
                     }
 
                     // <--[tag]
@@ -123,7 +151,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("headset_rotation_y")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("head.aim").get(0).value()).getY());
+                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("head.aim").get(0).value()).getY());
                     }
 
                     // <--[tag]
@@ -135,7 +163,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("righthand_rotation_y")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("righthand.aim").get(0).value()).getY());
+                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("righthand.aim").get(0).value()).getY());
                     }
 
                     // <--[tag]
@@ -147,7 +175,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("lefthand_rotation_y")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getY());
+                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getY());
                     }
 
                     // <--[tag]
@@ -159,7 +187,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("headset_rotation_z")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("head.aim").get(0).value()).getZ());
+                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("head.aim").get(0).value()).getZ());
                     }
 
                     // <--[tag]
@@ -171,7 +199,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("righthand_rotation_z")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("righthand.aim").get(0).value()).getZ());
+                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("righthand.aim").get(0).value()).getZ());
                     }
 
                     // <--[tag]
@@ -183,7 +211,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("lefthand_rotation_z")) {
-                        return new ElementTag(((Vec3D)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getZ());
+                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getZ());
                     }
 
                 } else {
