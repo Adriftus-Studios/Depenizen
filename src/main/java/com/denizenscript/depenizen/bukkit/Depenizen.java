@@ -128,6 +128,7 @@ public class Depenizen extends JavaPlugin {
         registerBridge("Towny", () -> new TownyBridge());
         registerBridge("Vampire", () -> new VampireBridge());
         registerBridge("ViaVersion", () -> new ViaVersionBridge());
+        registerBridge("Vivecraft-Spigot-Extensions", () -> new VivecraftBridge());
         registerBridge("Votifier", () -> new VotifierBridge());
         registerBridge("WorldEdit", () -> new WorldEditBridge());
         registerBridge("WorldGuard", () -> new WorldGuardBridge());
