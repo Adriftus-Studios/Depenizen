@@ -1,5 +1,6 @@
 package com.denizenscript.depenizen.bukkit.bridges;
 
+import com.denizenscript.denizen.nms.NMSHandler;
 import com.denizenscript.denizen.objects.LocationTag;
 import com.denizenscript.denizen.objects.PlayerTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
@@ -37,6 +38,18 @@ public class VivecraftBridge extends Bridge {
                     VivePlayer vp = new VivePlayer(player.getPlayerEntity());
 
                     // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.is_vr>
+                    // @returns ElementTag
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // Returns whether the player is using Vivecraft
+                    // -->
+
+                    if (attribute.startsWith("crawling")) {
+                        return new ElementTag(vp.isVR());
+                    }
+
+                    // <--[tag]
                     // @attribute <PlayerTag.vivecraft.crawling>
                     // @returns ElementTag
                     // @plugin Depenizen, ViveCraft
@@ -57,7 +70,9 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("headset_location")) {
-                        return new LocationTag((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value());
+                        LocationTag pos = new LocationTag(((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value()));
+                        LocationTag offset = new LocationTag(((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value())).add(convertVector(player.getPlayerEntity().getMetadata("head.aim").get(0).asString()));
+                        return new LocationTag(NMSHandler.getEntityHelper().faceLocation(pos, offset));
                     }
 
                     // <--[tag]
@@ -69,7 +84,9 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("righthand_location")) {
-                        return new LocationTag((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value());
+                        LocationTag pos = new LocationTag(((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value()));
+                        LocationTag offset = new LocationTag(((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value())).add(convertVector(player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString()));
+                        return new LocationTag(NMSHandler.getEntityHelper().faceLocation(pos, offset));
                     }
 
                     // <--[tag]
@@ -81,7 +98,9 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("lefthand_location")) {
-                        return new LocationTag((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value());
+                        LocationTag pos = new LocationTag(((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()));
+                        LocationTag offset = new LocationTag(((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value())).add(convertVector(player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString()));
+                        return new LocationTag(NMSHandler.getEntityHelper().faceLocation(pos, offset));
                     }
 
                     // <--[tag]
