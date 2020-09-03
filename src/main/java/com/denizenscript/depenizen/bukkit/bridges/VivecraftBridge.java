@@ -1,6 +1,5 @@
 package com.denizenscript.depenizen.bukkit.bridges;
 
-import com.denizenscript.denizen.nms.NMSHandler;
 import com.denizenscript.denizen.objects.LocationTag;
 import com.denizenscript.denizen.objects.PlayerTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
@@ -20,12 +19,6 @@ public class VivecraftBridge extends Bridge {
 
     @Override
     public void init() {
-        try {
-            VivePlayer.class.getDeclaredField("isTeleportMode").setAccessible(true);
-            VivePlayer.class.getDeclaredField("isReverseHands").setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
         // This is used instead of a property class because
         // property classes can only return strings and not tags
         PlayerTag.registerTag("vivecraft", (attribute, player) -> {
@@ -103,6 +96,7 @@ public class VivecraftBridge extends Bridge {
 
                     if (attribute.startsWith("is_teleport_mode")) {
                         try {
+                            VivePlayer.class.getDeclaredField("isTeleportMode").setAccessible(true);
                             return new ElementTag(String.valueOf((Boolean) vp.getClass().getDeclaredField("isTeleportMode").get(vp)));
                         } catch (IllegalAccessException | NoSuchFieldException e) {
                             e.printStackTrace();
@@ -119,6 +113,7 @@ public class VivecraftBridge extends Bridge {
 
                     if (attribute.startsWith("is_reverse_hands")) {
                         try {
+                            VivePlayer.class.getDeclaredField("isReverseHands").setAccessible(true);
                             return new ElementTag(String.valueOf((Boolean) vp.getClass().getDeclaredField("isReverseHands").get(vp)));
                         } catch (IllegalAccessException | NoSuchFieldException e) {
                             e.printStackTrace();
@@ -178,7 +173,6 @@ public class VivecraftBridge extends Bridge {
                         String[] list = s.substring(1, s.length()-1).split(", ");
                         return new LocationTag(((Location) player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()).setDirection(new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]))));
                     }
-
                 }
             }
             return null;
