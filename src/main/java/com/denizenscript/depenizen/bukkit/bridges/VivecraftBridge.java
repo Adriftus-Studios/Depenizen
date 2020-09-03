@@ -70,9 +70,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("headset_location")) {
-                        LocationTag pos = new LocationTag(((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value()));
-                        LocationTag offset = new LocationTag(((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value())).add(convertVector(player.getPlayerEntity().getMetadata("head.aim").get(0).asString()));
-                        return new LocationTag(NMSHandler.getEntityHelper().faceLocation(pos, offset));
+                        return new LocationTag(((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value()).setDirection((Vector) player.getPlayerEntity().getMetadata("head.aim").get(0));
                     }
 
                     // <--[tag]
@@ -84,9 +82,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("righthand_location")) {
-                        LocationTag pos = new LocationTag(((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value()));
-                        LocationTag offset = new LocationTag(((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value())).add(convertVector(player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString()));
-                        return new LocationTag(NMSHandler.getEntityHelper().faceLocation(pos, offset));
+                        return new LocationTag(((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value()).setDirection((Vector) player.getPlayerEntity().getMetadata("righthand.aim").get(0)));
                     }
 
                     // <--[tag]
@@ -98,9 +94,7 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("lefthand_location")) {
-                        LocationTag pos = new LocationTag(((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()));
-                        LocationTag offset = new LocationTag(((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value())).add(convertVector(player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString()));
-                        return new LocationTag(NMSHandler.getEntityHelper().faceLocation(pos, offset));
+                        return new LocationTag(((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()).setDirection((Vector) player.getPlayerEntity().getMetadata("lefthand.aim").get(0)));
                     }
 
                     // <--[tag]
