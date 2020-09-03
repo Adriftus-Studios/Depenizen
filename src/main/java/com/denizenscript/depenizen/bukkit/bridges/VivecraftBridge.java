@@ -20,6 +20,12 @@ public class VivecraftBridge extends Bridge {
 
     @Override
     public void init() {
+        try {
+            VivePlayer.class.getDeclaredField("isTeleportMode").setAccessible(true);
+            VivePlayer.class.getDeclaredField("isReverseHands").setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
         // This is used instead of a property class because
         // property classes can only return strings and not tags
         PlayerTag.registerTag("vivecraft", (attribute, player) -> {
@@ -31,10 +37,11 @@ public class VivecraftBridge extends Bridge {
             // @description
             // Returns null if player is not using ViveCraft
             // -->
-
             if (attribute.startsWith("vivecraft")) {
                 attribute = attribute.fulfill(1);
-                if (VSE.isVive(player.getPlayerEntity())) {
+                if (!VSE.isVive(player.getPlayerEntity())) {
+                    return null;
+                } else {
                     VivePlayer vp = new VivePlayer(player.getPlayerEntity());
 
                     // <--[tag]
@@ -45,19 +52,88 @@ public class VivecraftBridge extends Bridge {
                     // Returns whether the player is using Vivecraft
                     // -->
 
-                    if (attribute.startsWith("crawling")) {
+                    if (attribute.startsWith("is_vr")) {
                         return new ElementTag(vp.isVR());
                     }
 
                     // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.crawling>
+                    // @attribute <PlayerTag.vivecraft.height>
+                    // @returns ElementTag
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // Returns the player's calibrated height
+                    // --
+
+                    if (attribute.startsWith("height")) {
+                        return new ElementTag(player.getPlayerEntity().getMetadata("height").get(0).asFloat());
+                    }
+
+                    // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.activehand>
+                    // @returns ElementTag
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // Returns which hand (left or right) last performed some
+                    // actions. Currently throwing projectiles such as snowballs
+                    // --
+
+                    if (attribute.startsWith("activehand")) {
+                        return new ElementTag(player.getPlayerEntity().getMetadata("activehand").get(0).asString());
+                    }
+
+                    // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.is_seated>
+                    // @returns ElementTag
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // Returns whether the player is seated
+                    // --
+
+                    if (attribute.startsWith("is_seated")) {
+                        return new ElementTag(player.getPlayerEntity().getMetadata("seated").get(0).asBoolean());
+                    }
+
+                    // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.is_teleport_mode>
+                    // @returns ElementTag
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // Returns whether the player is in teleport mode
+                    // --
+
+                    if (attribute.startsWith("is_teleport_mode")) {
+                        try {
+                            return new ElementTag(String.valueOf((Boolean) vp.getClass().getDeclaredField("isTeleportMode").get(vp)));
+                        } catch (IllegalAccessException | NoSuchFieldException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.is_reverse_hands>
+                    // @returns ElementTag
+                    // @plugin Depenizen, ViveCraft
+                    // @description
+                    // Returns whether the player is in reverse hands mode
+                    // --
+
+                    if (attribute.startsWith("is_reverse_hands")) {
+                        try {
+                            return new ElementTag(String.valueOf((Boolean) vp.getClass().getDeclaredField("isReverseHands").get(vp)));
+                        } catch (IllegalAccessException | NoSuchFieldException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // <--[tag]
+                    // @attribute <PlayerTag.vivecraft.is_crawling>
                     // @returns ElementTag
                     // @plugin Depenizen, ViveCraft
                     // @description
                     // Returns whether the player is crawling
-                    // -->
+                    // --
 
-                    if (attribute.startsWith("crawling")) {
+                    if (attribute.startsWith("is_crawling")) {
                         return new ElementTag(vp.crawling);
                     }
 
@@ -66,11 +142,13 @@ public class VivecraftBridge extends Bridge {
                     // @returns LocationTag
                     // @plugin Depenizen, ViveCraft
                     // @description
-                    // TODO
+                    // Returns the LocationTag for the VR headset
                     // -->
 
                     if (attribute.startsWith("headset_location")) {
-                        return new LocationTag(((Location)player.getPlayerEntity().getMetadata("head.pos").get(0).value()).setDirection((Vector) player.getPlayerEntity().getMetadata("head.aim").get(0));
+                        String s = player.getPlayerEntity().getMetadata("head.aim").get(0).asString();
+                        String[] list = s.substring(1, s.length()-1).split(", ");
+                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("head.pos").get(0).value()).setDirection(new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]))));
                     }
 
                     // <--[tag]
@@ -78,11 +156,13 @@ public class VivecraftBridge extends Bridge {
                     // @returns LocationTag
                     // @plugin Depenizen, ViveCraft
                     // @description
-                    // TODO
+                    // Returns the LocationTag for the righthand controller
                     // -->
 
                     if (attribute.startsWith("righthand_location")) {
-                        return new LocationTag(((Location)player.getPlayerEntity().getMetadata("righthand.pos").get(0).value()).setDirection((Vector) player.getPlayerEntity().getMetadata("righthand.aim").get(0)));
+                        String s = player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString();
+                        String[] list = s.substring(1, s.length()-1).split(", ");
+                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("righthand.pos").get(0).value()).setDirection(new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]))));
                     }
 
                     // <--[tag]
@@ -90,145 +170,15 @@ public class VivecraftBridge extends Bridge {
                     // @returns LocationTag
                     // @plugin Depenizen, ViveCraft
                     // @description
-                    // TODO
+                    // Returns the LocationTag for the lefthand controller
                     // -->
 
                     if (attribute.startsWith("lefthand_location")) {
-                        return new LocationTag(((Location)player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()).setDirection((Vector) player.getPlayerEntity().getMetadata("lefthand.aim").get(0)));
+                        String s = player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString();
+                        String[] list = s.substring(1, s.length()-1).split(", ");
+                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()).setDirection(new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]))));
                     }
 
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.headset_rotation_x>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("headset_rotation_x")) {
-                        return convertVector(player.getPlayerEntity().getMetadata("head.aim").get(0).asString());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.righthand_rotation_x>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("righthand_rotation_x")) {
-                        return convertVector(player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.righthand_aim>
-                    // @returns LocationTag(Vector)
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-                    if (attribute.startsWith("righthand_aim")) {
-                        return convertVector(player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.lefthand_aim>
-                    // @returns LocationTag(Vector)
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-                    if (attribute.startsWith("lefthand_aim")) {
-                        return convertVector(player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.lefthand_rotation_x>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("lefthand_rotation_x")) {
-                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getX());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.headset_rotation_y>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("headset_rotation_y")) {
-                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("head.aim").get(0).value()).getY());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.righthand_rotation_y>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("righthand_rotation_y")) {
-                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("righthand.aim").get(0).value()).getY());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.lefthand_rotation_y>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("lefthand_rotation_y")) {
-                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getY());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.headset_rotation_z>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("headset_rotation_z")) {
-                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("head.aim").get(0).value()).getZ());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.righthand_rotation_z>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("righthand_rotation_z")) {
-                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("righthand.aim").get(0).value()).getZ());
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.lefthand_rotation_z>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // TODO
-                    // -->
-
-                    if (attribute.startsWith("lefthand_rotation_z")) {
-                        return new ElementTag(((Vector)player.getPlayerEntity().getMetadata("lefthand.aim").get(0).value()).getZ());
-                    }
-
-                } else {
-                    return null;
                 }
             }
             return null;
