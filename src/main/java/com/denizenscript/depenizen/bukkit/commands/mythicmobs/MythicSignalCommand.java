@@ -18,8 +18,8 @@ public class MythicSignalCommand extends AbstractCommand {
 
     public MythicSignalCommand() {
         setName("mythicsignal");
-        setSyntax("mythicsignal [<mythicmob>|...] [<signal>] (source:<entity>)");
-        setRequiredArguments(2, 3);
+        setSyntax("mythicsignal [<mythicmob>|...] [<signal>] [source:<entity>]");
+        setRequiredArguments(3, 3);
     }
 
     // <--[command]
@@ -68,6 +68,9 @@ public class MythicSignalCommand extends AbstractCommand {
         if (!scriptEntry.hasObject("signal")) {
             throw new InvalidArgumentsException("Must specify a signal to send.");
         }
+        if (!scriptEntry.hasObject("source")) {
+            throw new InvalidArgumentsException("Must specify a source for the signal.");
+        }
     }
 
     @Override
@@ -81,7 +84,7 @@ public class MythicSignalCommand extends AbstractCommand {
                     + (source == null ? "" : source.debug()));
         }
         for (MythicMobsMobTag mob : targets) {
-            mob.getMob().signalMob(source == null ? null : BukkitAdapter.adapt(source.getBukkitEntity()), signal.asString());
+            mob.getMob().signalMob(BukkitAdapter.adapt(source.getBukkitEntity()), signal.asString());
         }
     }
 }

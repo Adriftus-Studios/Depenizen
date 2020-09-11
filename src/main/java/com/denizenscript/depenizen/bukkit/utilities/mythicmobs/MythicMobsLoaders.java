@@ -2,9 +2,11 @@ package com.denizenscript.depenizen.bukkit.utilities.mythicmobs;
 
 import com.denizenscript.denizen.utilities.DenizenAPI;
 import com.denizenscript.depenizen.bukkit.utilities.mythicmobs.conditions.DenizenCondition;
+import com.denizenscript.depenizen.bukkit.utilities.mythicmobs.mechanics.DenizenMechanic;
 import com.denizenscript.depenizen.bukkit.utilities.mythicmobs.targeters.DenizenEntityTargeter;
 import com.denizenscript.depenizen.bukkit.utilities.mythicmobs.targeters.DenizenLocationTargeter;
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicConditionLoadEvent;
+import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicMechanicLoadEvent;
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicTargeterLoadEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -61,6 +63,13 @@ public class MythicMobsLoaders implements Listener {
     public void onMythicConditionsLoad(MythicConditionLoadEvent event) {
         if (event.getConditionName().toLowerCase().equals("denizencondition")) {
             event.register(new DenizenCondition(event.getConfig().getLine(), event.getConfig()));
+        }
+    }
+
+    @EventHandler
+    public void onMythicMechanicsLoad(MythicMechanicLoadEvent event) {
+        if (event.getMechanicName().toLowerCase().equals("denizencommand")) {
+            event.register(new DenizenMechanic(event.getConfig().getLine(), event.getConfig()));
         }
     }
 }

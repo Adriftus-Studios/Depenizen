@@ -1,14 +1,27 @@
 package com.denizenscript.depenizen.bukkit.bridges;
 
-import com.denizenscript.denizen.nms.NMSHandler;
 import com.denizenscript.denizen.objects.LocationTag;
 import com.denizenscript.denizen.objects.PlayerTag;
+import com.denizenscript.denizen.utilities.DenizenAPI;
 import com.denizenscript.denizencore.objects.core.ElementTag;
+import com.denizenscript.denizencore.objects.core.ListTag;
+import com.denizenscript.denizencore.objects.core.MapTag;
 import com.denizenscript.depenizen.bukkit.Bridge;
+import com.denizenscript.depenizen.bukkit.commands.vivecraft.VivePoseCommand;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.vivecraft.VSE;
 import org.vivecraft.VivePlayer;
+
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Map;
+import java.util.UUID;
 
 public class VivecraftBridge extends Bridge {
 
@@ -18,8 +31,78 @@ public class VivecraftBridge extends Bridge {
         return new LocationTag(vector);
     }
 
+    public static Map<UUID, VivePlayer> getVivePlayers() {
+        return VSE.vivePlayers;
+    }
+
+    public static byte[] getByteArray(LocationTag loc, LocationTag vector) {
+        ByteBuf payload = Unpooled.buffer();
+        payload.writeBoolean(false);
+        payload.writeFloat((float)loc.getX());
+        payload.writeFloat((float)loc.getY());
+        payload.writeFloat((float)loc.getZ());
+        payload.writeFloat(0);
+        payload.writeFloat((float)vector.getX());
+        payload.writeFloat((float)vector.getY());
+        payload.writeFloat((float)vector.getZ());
+        return new byte[payload.readableBytes()];
+    }
+
+    public static byte[] getByteArray(LocationTag loc) {
+        ByteBuf payload = Unpooled.buffer();
+        payload.writeBoolean(false);
+        payload.writeFloat((float) loc.getX());
+        payload.writeFloat((float) loc.getY());
+        payload.writeFloat((float) loc.getZ());
+        payload.writeFloat((float) 0.75);
+        payload.writeFloat((float) loc.toVector().getX());
+        payload.writeFloat((float) loc.toVector().getY());
+        payload.writeFloat((float) loc.toVector().getZ());
+        return new byte[payload.readableBytes()];
+    }
+
+    public static VivePlayer getIdlePlayer(Player npc) {
+        VivePlayer returnable = new VivePlayer(npc);
+        ByteBuf payload = Unpooled.buffer();
+        payload.writeBoolean(false);
+        payload.writeFloat((float) 0);
+        payload.writeFloat((float) 1);
+        payload.writeFloat((float) 0);
+        payload.writeFloat((float) 0.96);
+        payload.writeFloat((float) 0.25);
+        payload.writeFloat((float) 0);
+        payload.writeFloat((float) 0);
+        returnable.hmdData = new byte[payload.readableBytes()];
+        payload = Unpooled.buffer();
+        payload.writeBoolean(false);
+        payload.writeFloat((float) 0.5193569);
+        payload.writeFloat((float) 0.69866323);
+        payload.writeFloat((float) 0.044001184);
+        payload.writeFloat((float) 0.58673733);
+        payload.writeFloat((float) -0.7875683);
+        payload.writeFloat((float) 0.1693283);
+        payload.writeFloat((float) 0.082498305);
+        returnable.controller0data = new byte[payload.readableBytes()];
+        payload = Unpooled.buffer();
+        payload.writeBoolean(false);
+        payload.writeFloat((float) -0.3381468);
+        payload.writeFloat((float) 0.6491368);
+        payload.writeFloat((float) -0.25372127);
+        payload.writeFloat((float) -0.47935414);
+        payload.writeFloat((float) 0.7218389);
+        payload.writeFloat((float) 0.3276589);
+        payload.writeFloat((float) 0.37657538);
+        returnable.controller1data = new byte[payload.readableBytes()];
+        returnable.heightScale = (float) 0.93;
+        returnable.worldScale = (float) 1.1;
+        return returnable;
+
+    }
     @Override
     public void init() {
+
+        DenizenAPI.getCurrentInstance().getCommandRegistry().registerCommand(VivePoseCommand.class);
+
         try {
             VivePlayer.class.getDeclaredField("isTeleportMode").setAccessible(true);
             VivePlayer.class.getDeclaredField("isReverseHands").setAccessible(true);
@@ -42,7 +125,7 @@ public class VivecraftBridge extends Bridge {
                 if (!VSE.isVive(player.getPlayerEntity())) {
                     return null;
                 } else {
-                    VivePlayer vp = new VivePlayer(player.getPlayerEntity());
+                    VivePlayer vp = VivecraftBridge.getVivePlayers().get(player.getPlayerEntity().getUniqueId());
 
                     // <--[tag]
                     // @attribute <PlayerTag.vivecraft.is_vr>
@@ -54,6 +137,61 @@ public class VivecraftBridge extends Bridge {
 
                     if (attribute.startsWith("is_vr")) {
                         return new ElementTag(vp.isVR());
+                    }
+
+                    if (attribute.startsWith("test")) {
+                        MapTag map = new MapTag();
+                        ListTag list1 = new ListTag();
+                        ByteArrayInputStream byin1 = new ByteArrayInputStream(vp.hmdData);
+                        DataInputStream da1 = new DataInputStream(byin1);
+                        try {
+                            list1.addObject(new ElementTag(String.valueOf(da1.readBoolean())));
+                            list1.addObject(new ElementTag(String.valueOf(da1.readFloat())));
+                            list1.addObject(new ElementTag(String.valueOf(da1.readFloat())));
+                            list1.addObject(new ElementTag(String.valueOf(da1.readFloat())));
+                            list1.addObject(new ElementTag(String.valueOf(da1.readFloat())));
+                            list1.addObject(new ElementTag(String.valueOf(da1.readFloat())));
+                            list1.addObject(new ElementTag(String.valueOf(da1.readFloat())));
+                            list1.addObject(new ElementTag(String.valueOf(da1.readFloat())));
+                            map.putObject("HMD", list1);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        ListTag list2 = new ListTag();
+                        ByteArrayInputStream byin2 = new ByteArrayInputStream(vp.controller0data);
+                        DataInputStream da2 = new DataInputStream(byin2);
+                        try {
+                            list2.addObject(new ElementTag(String.valueOf(da2.readBoolean())));
+                            list2.addObject(new ElementTag(String.valueOf(da2.readFloat())));
+                            list2.addObject(new ElementTag(String.valueOf(da2.readFloat())));
+                            list2.addObject(new ElementTag(String.valueOf(da2.readFloat())));
+                            list2.addObject(new ElementTag(String.valueOf(da2.readFloat())));
+                            list2.addObject(new ElementTag(String.valueOf(da2.readFloat())));
+                            list2.addObject(new ElementTag(String.valueOf(da2.readFloat())));
+                            list2.addObject(new ElementTag(String.valueOf(da2.readFloat())));
+                            map.putObject("controller0", list2);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        ListTag list = new ListTag();
+                        ByteArrayInputStream byin = new ByteArrayInputStream(vp.controller1data);
+                        DataInputStream da = new DataInputStream(byin);
+                        try {
+                            list.addObject(new ElementTag(String.valueOf(da.readBoolean())));
+                            list.addObject(new ElementTag(String.valueOf(da.readFloat())));
+                            list.addObject(new ElementTag(String.valueOf(da.readFloat())));
+                            list.addObject(new ElementTag(String.valueOf(da.readFloat())));
+                            list.addObject(new ElementTag(String.valueOf(da.readFloat())));
+                            list.addObject(new ElementTag(String.valueOf(da.readFloat())));
+                            list.addObject(new ElementTag(String.valueOf(da.readFloat())));
+                            list.addObject(new ElementTag(String.valueOf(da.readFloat())));
+                            map.putObject("controller1", list);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        map.putObject("height", new ElementTag(vp.heightScale));
+                        map.putObject("world", new ElementTag(vp.worldScale));
+                        return map;
                     }
 
                     // <--[tag]
@@ -94,38 +232,6 @@ public class VivecraftBridge extends Bridge {
                     }
 
                     // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.is_teleport_mode>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // Returns whether the player is in teleport mode
-                    // --
-
-                    if (attribute.startsWith("is_teleport_mode")) {
-                        try {
-                            return new ElementTag(String.valueOf((Boolean) vp.getClass().getDeclaredField("isTeleportMode").get(vp)));
-                        } catch (IllegalAccessException | NoSuchFieldException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    // <--[tag]
-                    // @attribute <PlayerTag.vivecraft.is_reverse_hands>
-                    // @returns ElementTag
-                    // @plugin Depenizen, ViveCraft
-                    // @description
-                    // Returns whether the player is in reverse hands mode
-                    // --
-
-                    if (attribute.startsWith("is_reverse_hands")) {
-                        try {
-                            return new ElementTag(String.valueOf((Boolean) vp.getClass().getDeclaredField("isReverseHands").get(vp)));
-                        } catch (IllegalAccessException | NoSuchFieldException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    // <--[tag]
                     // @attribute <PlayerTag.vivecraft.is_crawling>
                     // @returns ElementTag
                     // @plugin Depenizen, ViveCraft
@@ -146,9 +252,8 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("headset_location")) {
-                        String s = player.getPlayerEntity().getMetadata("head.aim").get(0).asString();
-                        String[] list = s.substring(1, s.length()-1).split(", ");
-                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("head.pos").get(0).value()).setDirection(new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]))));
+                        String aim = player.getPlayerEntity().getMetadata("head.aim").get(0).asString();
+                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("head.pos").get(0).value()).setDirection(convertVector(aim).toVector()));
                     }
 
                     // <--[tag]
@@ -160,9 +265,8 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("righthand_location")) {
-                        String s = player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString();
-                        String[] list = s.substring(1, s.length()-1).split(", ");
-                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("righthand.pos").get(0).value()).setDirection(new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]))));
+                        String aim = player.getPlayerEntity().getMetadata("righthand.aim").get(0).asString();
+                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("righthand.pos").get(0).value()).setDirection(convertVector(aim).toVector()));
                     }
 
                     // <--[tag]
@@ -174,9 +278,8 @@ public class VivecraftBridge extends Bridge {
                     // -->
 
                     if (attribute.startsWith("lefthand_location")) {
-                        String s = player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString();
-                        String[] list = s.substring(1, s.length()-1).split(", ");
-                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()).setDirection(new Vector(Double.parseDouble(list[0]), Double.parseDouble(list[1]), Double.parseDouble(list[2]))));
+                        String aim = player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString();
+                        return new LocationTag(((Location) player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()).setDirection(convertVector(aim).toVector()));
                     }
 
                 }
