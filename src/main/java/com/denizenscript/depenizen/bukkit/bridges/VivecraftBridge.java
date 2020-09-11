@@ -19,7 +19,6 @@ import org.vivecraft.VivePlayer;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 
@@ -100,15 +99,6 @@ public class VivecraftBridge extends Bridge {
     }
     @Override
     public void init() {
-
-        DenizenAPI.getCurrentInstance().getCommandRegistry().registerCommand(VivePoseCommand.class);
-
-        try {
-            VivePlayer.class.getDeclaredField("isTeleportMode").setAccessible(true);
-            VivePlayer.class.getDeclaredField("isReverseHands").setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
         // This is used instead of a property class because
         // property classes can only return strings and not tags
         PlayerTag.registerTag("vivecraft", (attribute, player) -> {
@@ -281,7 +271,6 @@ public class VivecraftBridge extends Bridge {
                         String aim = player.getPlayerEntity().getMetadata("lefthand.aim").get(0).asString();
                         return new LocationTag(((Location) player.getPlayerEntity().getMetadata("lefthand.pos").get(0).value()).setDirection(convertVector(aim).toVector()));
                     }
-
                 }
             }
             return null;
